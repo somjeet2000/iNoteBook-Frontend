@@ -3,7 +3,7 @@ import noteContext from '../context/notes/NoteContext';
 import NoteItem from './NoteItem';
 import EditNote from './EditNote';
 import { useNavigate } from 'react-router-dom';
-import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min';
 import AddNote2 from './AddNote2';
 
 const Notes = ({ searchTag }) => {
@@ -13,6 +13,7 @@ const Notes = ({ searchTag }) => {
   const navigate = useNavigate();
   const [addNote, setAddNote] = useState(false);
   const [loading, setLoading] = useState(true); // Track loading state
+  const [isHovered, setIsHovered] = useState(false);
 
   let ref = useRef(null);
   let refClose = useRef(null);
@@ -68,15 +69,6 @@ const Notes = ({ searchTag }) => {
   }, []);
 
   useEffect(() => {
-    const tooltipTriggerList = document.querySelectorAll(
-      '[data-bs-toggle="tooltip"]'
-    );
-    [...tooltipTriggerList].map(
-      (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
-    );
-  }, []);
-
-  useEffect(() => {
     if (!searchTag) {
       getAllNotes(); // Fetch all notes when searchTag is empty
     } else {
@@ -106,17 +98,32 @@ const Notes = ({ searchTag }) => {
   return (
     <div className='container my-3'>
       <div className='row'>
-        <div className='row'>
+        <div className='d-flex justify-content-between align-items-center'>
           <h2 className='col-11'>Your Notes</h2>
-          <div className='col-1'>
+          <div className='col-1 d-flex justify-content-center'>
             <button
               className='btn btn-outline-dark rounded-circle'
-              data-bs-toggle='tooltip'
-              data-bs-placement='top'
-              data-bs-title='Add Note'
               onClick={handleClick}
+              style={{
+                backgroundColor: isHovered ? 'black' : 'white',
+                padding: '10px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '40px',
+                height: '40px',
+                transition: 'background-color 0.3s ease, color 0.3s ease',
+              }}
+              onMouseEnter={() => setIsHovered(true)} // Set hover state to true
+              onMouseLeave={() => setIsHovered(false)} // Set hover state to false
             >
-              <i className='fa-solid fa-plus'></i>
+              <i
+                className='fa-solid fa-plus'
+                style={{
+                  fontSize: '20px',
+                  color: isHovered ? 'white' : 'black',
+                }}
+              ></i>
             </button>
           </div>
         </div>
