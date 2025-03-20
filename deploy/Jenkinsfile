@@ -1,5 +1,5 @@
 pipeline {
-    agent none  // No global agent, as we use different agents per stage
+    agent any
 
     parameters {
         choice(name: 'Environment', choices: ['Development', 'Production'], description: 'Choose the environment to build')
@@ -8,48 +8,31 @@ pipeline {
     }
 
     environment {
-        DOCKER_HOST = 'tcp://host.docker.internal:2375'
         NETLIFY_AUTH_TOKEN = credentials('netlify-auth-token')
         DEV_SITE_ID = 'efd65b24-988f-43c8-be64-9a86aba14b42'
         PROD_SITE_ID = 'b75a440e-3888-4c72-83b1-76ea469517b7'
-        WORKSPACE_DIR = "/workspace"
     }
 
     stages {
 
         stage('Clean Workspace') {
-            agent {
-                docker {
-                    image 'node:20-alpine'
-                    args '--user root -v $PWD:/workspace'
-                }
-            }
             steps {
-                script {
-                    sh "rm -rf $WORKSPACE_DIR/*"
-                    echo '✅ Workspace Cleaned.'
-                }
+                cleanWs()
             }
         }
 
         stage('Code Checkout') {
-            agent {
-                docker {
-                    image 'node:20-alpine'
-                    args '--user root -v $PWD:/workspace'
-                }
-            }
             steps {
                 script {
-                    // Check if Branch is selected as Others, and Others is empty
-                    if(params.Branch == 'Others' && !params.Others?.trim()) {
+                    if (params.Branch == 'Others' && !params.Others?.trim()) {
                         error "Branch Name is required when selected Others as Branch"
                     }
 
                     def branchToSelect = params.Branch == 'Others' ? params.Others.trim() : params.Branch
+
                     checkout scmGit(
-                        branches: [[name: "*/${branchToSelect}"]],
-                        extensions: [],
+                        branches: [[name: "*/${branchToSelect}"]], 
+                        extensions: [], 
                         userRemoteConfigs: [[url: 'https://github.com/somjeet2000/ThinkPad-Client.git']]
                     )
                 }
@@ -60,13 +43,13 @@ pipeline {
             agent {
                 docker {
                     image 'node:20-alpine'
-                    args '--user root -v $PWD:/workspace'
+                    args '--user root -v "$WORKSPACE:/workspace"'
                 }
             }
             steps {
                 script {
                     sh """
-                        cd $WORKSPACE_DIR
+                        cd /workspace
                         rm -rf node_modules build
                         npm cache clean --force
                         npm ci
@@ -90,16 +73,21 @@ pipeline {
             agent {
                 docker {
                     image 'node:20-alpine'
-                    args '--user root -v $PWD:/workspace'
+                    args '--user root -v "$WORKSPACE:/workspace"'
                 }
             }
             steps {
                 script {
-                    sh 'npm install -g netlify-cli'
-                    echo 'Netlify CLI Installed Successfully'
-                    def siteId = params.Environment == 'Development' ? env.DEV_SITE_ID : env.PROD_SITE_ID
-                    sh "netlify deploy --prod --auth ${NETLIFY_AUTH_TOKEN} --site ${siteId} --dir $WORKSPACE_DIR/build"
-                    echo "🚀 Deployed to ${params.Environment}."
+                    sh """
+                        cd /workspace
+                        npm install -g netlify-cli
+                        echo '✅ Netlify CLI Installed Successfully'
+
+                        siteId=\$( [ "${params.Environment}" = "Development" ] && echo "${env.DEV_SITE_ID}" || echo "${env.PROD_SITE_ID}" )
+
+                        netlify deploy --prod --auth ${NETLIFY_AUTH_TOKEN} --site \$siteId --dir build
+                        echo "🚀 Deployed to ${params.Environment}."
+                    """
                 }
             }
         }
