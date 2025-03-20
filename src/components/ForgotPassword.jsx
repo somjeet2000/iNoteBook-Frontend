@@ -96,6 +96,7 @@ const ForgotPassword = () => {
     }
     if (isValid) {
       window.scrollTo(0, 0);
+      showAlert('Please Wait! Verifying your answer...', 'info');
       const response = await fetch(
         `${host}/api/forgotpassword/forgotpassword`,
         {
@@ -110,7 +111,6 @@ const ForgotPassword = () => {
           }),
         }
       );
-      showAlert('Please Wait! Verifying your answer...', 'info');
       const responseJSON = await response.json();
       console.log(responseJSON);
       if (responseJSON.isValid) {
@@ -118,7 +118,10 @@ const ForgotPassword = () => {
           'verification-token',
           responseJSON.verificationToken
         );
-        showAlert('Security Answer Verified! You can proceed.', 'success');
+        showAlert(
+          'Security answer verified! You can proceed to change password.',
+          'success'
+        );
         setShowResetForm(true);
         setDisabled(true);
       } else {
@@ -175,7 +178,7 @@ const ForgotPassword = () => {
   return (
     <>
       <Alert alert={alert} />
-      <div className='container my-3'>
+      {/* <div className='container my-3'>
         <h3 className='text-center my-3'>Reset Your Password here 🤞</h3>
         <form onSubmit={handleSubmit}>
           <div className='mb-2 row'>
@@ -338,6 +341,152 @@ const ForgotPassword = () => {
             </form>
           </div>
         )}
+      </div> */}
+      <div className='container mt-5'>
+        <div
+          className='card p-4 shadow-sm'
+          style={{ maxWidth: '450px', margin: 'auto' }}
+        >
+          <h4 className='text-center mb-4'>Reset Your Password here 🤞</h4>
+          <form onSubmit={handleSubmit}>
+            <div className='mb-2'>
+              <label htmlFor='email' className='form-label'>
+                Email address
+              </label>
+              <input
+                type='text'
+                name='email'
+                value={email}
+                onChange={handleChange}
+                className='form-control'
+                id='email'
+                aria-describedby='emailHelp'
+                disabled={disabled}
+              />
+            </div>
+            <p style={{ color: '#bf2d31', fontWeight: '500' }}>{emailError}</p>
+            <div className='mb-3'>
+              <label htmlFor='securityQuestion' className='form-label'>
+                Select your question
+              </label>
+              <select
+                className='form-select'
+                name='securityQuestion'
+                value={securityQuestion}
+                onChange={handleChange}
+                disabled={disabled}
+                id='securityQuestion'
+              >
+                <option value="What is your mother's maiden name?">
+                  What is your mother's maiden name?
+                </option>
+                <option value='What was the name of your first pet?'>
+                  What was the name of your first pet?
+                </option>
+                <option value='What was the name of your elementary school?'>
+                  What was the name of your elementary school?
+                </option>
+                <option value='What is the name of the town where you were born?'>
+                  What is the name of the town where you were born?
+                </option>
+                <option value='What was your childhood nickname?'>
+                  What was your childhood nickname?
+                </option>
+              </select>
+            </div>
+            <div className='mb-2'>
+              <label
+                htmlFor='exampleInputSecurityAnswer'
+                className='form-label'
+              >
+                Your answer
+              </label>
+              <div className='input-group'>
+                <input
+                  type={
+                    securityAnswerVisible && !disabled ? 'text' : 'password'
+                  }
+                  name='securityAnswer'
+                  className='form-control d-inline'
+                  id='exampleInputSecurityAnswer'
+                  value={securityAnswer}
+                  onChange={handleChange}
+                  disabled={disabled}
+                />
+                {securityAnswer && !disabled && (
+                  <span
+                    className='input-group-text bg-white'
+                    style={{ cursor: 'pointer', borderLeft: 'none' }}
+                    onClick={securityAnswerVisibility}
+                  >
+                    <i
+                      className={
+                        securityAnswerVisible
+                          ? 'fa-regular fa-eye-slash'
+                          : 'fa-regular fa-eye'
+                      }
+                    ></i>
+                  </span>
+                )}
+              </div>
+            </div>
+            <p style={{ color: '#bf2d31', fontWeight: '500' }}>
+              {securityAnswerError}
+            </p>
+            <button
+              type='submit'
+              className='btn btn-success w-100'
+              disabled={disabled}
+            >
+              Submit Answer
+            </button>
+          </form>
+          {showResetForm && (
+            <>
+              <h4 className='text-center mt-4 mb-3'>
+                Enter the New Password 👇
+              </h4>
+              <form onSubmit={handlePasswordChangeSubmit}>
+                <div className='mb-2'>
+                  <label htmlFor='inputPassword' className='form-label'>
+                    New password
+                  </label>
+                  <div className='input-group'>
+                    <input
+                      type={newPasswordVisible ? 'text' : 'password'}
+                      className='form-control d-inline'
+                      id='inputPassword'
+                      name='password'
+                      value={newPassword}
+                      onChange={handleChange}
+                    />
+                    {newPassword && (
+                      <span
+                        className='input-group-text bg-white'
+                        style={{ cursor: 'pointer', borderLeft: 'none' }}
+                        onClick={togglePasswordVisibility}
+                      >
+                        <i
+                          className={
+                            newPasswordVisible
+                              ? 'fa-regular fa-eye-slash'
+                              : 'fa-regular fa-eye'
+                          }
+                        ></i>
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <p style={{ color: '#bf2d31', fontWeight: '500' }}>
+                  {newPasswordError}
+                </p>
+                <button type='submit' className='btn btn-primary w-100'>
+                  Reset Password
+                </button>
+              </form>
+            </>
+          )}
+        </div>
       </div>
     </>
   );

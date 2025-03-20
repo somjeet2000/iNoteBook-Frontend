@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import authContext from '../context/authentication/AuthenticationContext';
 import alertContext from '../context/alert/AlertContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -146,143 +146,170 @@ const Signup = () => {
     }
   };
 
+  /*
+  Fixing the bug where if the user already authentication, it still allows to redirect to login/register, which shouldn't be possible.
+  */
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      navigate('/');
+    }
+  }, [navigate]);
+
   return (
     <>
       <Alert alert={alert} />
-      <div className='container my-3'>
-        <h2 className='text-center'>
-          Register Yourself to continue in ThinkPad
-        </h2>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor='exampleInputName1' className='form-label'>
-              Name
-            </label>
-            <input
-              type='text'
-              name='userName'
-              value={userName}
-              onChange={handleChange}
-              className='form-control'
-              id='exampleInputName1'
-              aria-describedby='emailHelp'
-            />
-          </div>
-          <p style={{ color: '#bf2d31', fontWeight: '500' }}>{nameError}</p>
-          <div>
-            <label htmlFor='exampleInputEmail1' className='form-label'>
-              Email address
-            </label>
-            <input
-              type='email'
-              name='email'
-              value={email}
-              onChange={handleChange}
-              className='form-control'
-              id='exampleInputEmail1'
-              aria-describedby='emailHelp'
-            />
-            {/* <div id="emailHelp" className="form-text">
-              We'll never share your email with anyone else.
-            </div> */}
-          </div>
-          <p style={{ color: '#bf2d31', fontWeight: '500' }}>{emailError}</p>
-          <div>
-            <label htmlFor='exampleInputPassword1' className='form-label'>
-              Password
-            </label>
-            <input
-              type={passwordVisible ? 'text' : 'password'}
-              name='password'
-              value={password}
-              onChange={handleChange}
-              className='form-control d-inline'
-              id='exampleInputPassword1'
-            />
-            {password && (
-              <i
-                className={
-                  passwordVisible
-                    ? 'fa-regular fa-eye-slash'
-                    : 'fa-regular fa-eye'
-                }
-                style={{ marginLeft: '-30px', cursor: 'pointer' }}
-                onClick={togglePasswordVisibility}
-              ></i>
-            )}
-          </div>
-          <p style={{ color: '#bf2d31', fontWeight: '500' }}>{passwordError}</p>
-          {/*
+      <div className='container mt-4'>
+        <div
+          className='card p-4 shadow-sm'
+          style={{ maxWidth: '500px', margin: 'auto' }}
+        >
+          <h3 className='text-center'>Register Yourself 🤞</h3>
+          <form onSubmit={handleSubmit}>
+            <div>
+              <label htmlFor='exampleInputName1' className='form-label'>
+                Name
+              </label>
+              <input
+                type='text'
+                name='userName'
+                value={userName}
+                onChange={handleChange}
+                className='form-control'
+                id='exampleInputName1'
+                aria-describedby='emailHelp'
+              />
+            </div>
+            <p style={{ color: '#bf2d31', fontWeight: '500' }}>{nameError}</p>
+            <div>
+              <label htmlFor='exampleInputEmail1' className='form-label'>
+                Email address
+              </label>
+              <input
+                type='text'
+                name='email'
+                value={email}
+                onChange={handleChange}
+                className='form-control'
+                id='exampleInputEmail1'
+                aria-describedby='emailHelp'
+              />
+            </div>
+            <p style={{ color: '#bf2d31', fontWeight: '500' }}>{emailError}</p>
+            <div>
+              <label htmlFor='exampleInputPassword1' className='form-label'>
+                Password
+              </label>
+              <div className='input-group'>
+                <input
+                  type={passwordVisible ? 'text' : 'password'}
+                  name='password'
+                  value={password}
+                  onChange={handleChange}
+                  className='form-control d-inline'
+                  id='exampleInputPassword1'
+                />
+                {password && (
+                  <span
+                    className='input-group-text bg-white'
+                    style={{ cursor: 'pointer', borderLeft: 'none' }}
+                    onClick={togglePasswordVisibility}
+                  >
+                    <i
+                      className={
+                        passwordVisible
+                          ? 'fa-regular fa-eye-slash'
+                          : 'fa-regular fa-eye'
+                      }
+                    ></i>
+                  </span>
+                )}
+              </div>
+            </div>
+            <p style={{ color: '#bf2d31', fontWeight: '500' }}>
+              {passwordError}
+            </p>
+            {/*
           Implement the functionality for Forget Password - Bug 10001
           ---START---
           */}
-          <div>
-            <label className='form-label'>Select your question</label>
-            <select
-              className='form-select'
-              aria-label='Default select example'
-              name='securityQuestion'
-              value={securityQuestion}
-              onChange={handleChange}
-            >
-              <option value="What is your mother's maiden name?">
-                What is your mother's maiden name?
-              </option>
-              <option value='What was the name of your first pet?'>
-                What was the name of your first pet?
-              </option>
-              <option value='What was the name of your elementary school?'>
-                What was the name of your elementary school?
-              </option>
-              <option value='What is the name of the town where you were born?'>
-                What is the name of the town where you were born?
-              </option>
-              <option value='What was your childhood nickname?'>
-                What was your childhood nickname?
-              </option>
-            </select>
-          </div>
-          <p style={{ color: '#bf2d31', fontWeight: '500' }}>
-            {securityQuestionError}
-          </p>
-          <div>
-            <label htmlFor='exampleInputSecurityAnswer' className='form-label'>
-              Your Answer
-            </label>
-            <input
-              type={securityAnswerVisible ? 'text' : 'password'}
-              name='securityAnswer'
-              value={securityAnswer}
-              onChange={handleChange}
-              className='form-control d-inline'
-              id='exampleInputSecurityAnswer'
-            />
-            {securityAnswer && (
-              <i
-                className={
-                  securityAnswerVisible
-                    ? 'fa-regular fa-eye-slash'
-                    : 'fa-regular fa-eye'
-                }
-                style={{ marginLeft: '-30px', cursor: 'pointer' }}
-                onClick={toggleSecurityAnswerVisibility}
-              ></i>
-            )}
-          </div>
-          <p style={{ color: '#bf2d31', fontWeight: '500' }}>
-            {securityAnswerError}
-          </p>
-          {/*
+            <div>
+              <label className='form-label'>Select your question</label>
+              <select
+                className='form-select'
+                aria-label='Default select example'
+                name='securityQuestion'
+                value={securityQuestion}
+                onChange={handleChange}
+              >
+                <option value="What is your mother's maiden name?">
+                  What is your mother's maiden name?
+                </option>
+                <option value='What was the name of your first pet?'>
+                  What was the name of your first pet?
+                </option>
+                <option value='What was the name of your elementary school?'>
+                  What was the name of your elementary school?
+                </option>
+                <option value='What is the name of the town where you were born?'>
+                  What is the name of the town where you were born?
+                </option>
+                <option value='What was your childhood nickname?'>
+                  What was your childhood nickname?
+                </option>
+              </select>
+            </div>
+            <p style={{ color: '#bf2d31', fontWeight: '500' }}>
+              {securityQuestionError}
+            </p>
+            <div>
+              <label
+                htmlFor='exampleInputSecurityAnswer'
+                className='form-label'
+              >
+                Your Answer
+              </label>
+              <div className='input-group'>
+                <input
+                  type={securityAnswerVisible ? 'text' : 'password'}
+                  name='securityAnswer'
+                  value={securityAnswer}
+                  onChange={handleChange}
+                  className='form-control d-inline'
+                  id='exampleInputSecurityAnswer'
+                />
+                {securityAnswer && (
+                  <span
+                    className='input-group-text bg-white'
+                    style={{ cursor: 'pointer', borderLeft: 'none' }}
+                    onClick={toggleSecurityAnswerVisibility}
+                  >
+                    <i
+                      className={
+                        securityAnswerVisible
+                          ? 'fa-regular fa-eye-slash'
+                          : 'fa-regular fa-eye'
+                      }
+                    ></i>
+                  </span>
+                )}
+              </div>
+            </div>
+            <p style={{ color: '#bf2d31', fontWeight: '500' }}>
+              {securityAnswerError}
+            </p>
+            {/*
           Implement the functionality for Forget Password - Bug 10001
           ---END---
           */}
-          <p>
-            Already Registered? <Link to='/login'>Login here</Link>
-          </p>
-          <button type='submit' className='btn btn-primary'>
-            Register
-          </button>
-        </form>
+            <p className='text-center'>
+              Already registered? <Link to='/login'>Login here</Link>
+            </p>
+            <button type='submit' className='btn btn-success w-100'>
+              Register
+            </button>
+          </form>
+        </div>
       </div>
     </>
   );

@@ -1,4 +1,5 @@
 import './App.css';
+import { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
@@ -10,7 +11,7 @@ import AuthenticationState from './context/authentication/AuthenticationState';
 import AlertState from './context/alert/AlertState';
 import ForgotPassword from './components/ForgotPassword';
 import Profile from './components/Profile';
-import { useState } from 'react';
+import NotFound from './components/NotFound';
 
 /*
 Very Important:-
@@ -38,9 +39,14 @@ function App() {
                   <Route path='about' element={<About />} />
                   <Route path='login' element={<Login />} />
                   <Route path='signup' element={<Signup />} />
-                  <Route path='forgotpassword' element={<ForgotPassword />} />
+                  <Route
+                    path='login/forgotpassword'
+                    element={<ForgotPassword />}
+                  />
                   <Route path='profile' element={<Profile />} />
                 </Route>
+                {/* Catch-all route at the bottom */}
+                <Route path='*' element={<NotFound />} />
               </Routes>
             </BrowserRouter>
           </AuthenticationState>
